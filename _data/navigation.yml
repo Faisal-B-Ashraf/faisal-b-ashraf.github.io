@@ -1,10 +1,12 @@
 # main links links
 main:
-  - title: "Publications"
-    url: /publications/
+  - title: "CV"
+    #url: /publications/
+    url: files/academic_cv__Updated_Nov_2022_.pdf
+    
 
-  - title: "Talks"
-    url: /talks/    
+  - title: "Publications"
+    url: /https://scholar.google.com/citations?user=04FzE9EAAAAJ&hl=en&oi=sra/    
 
   - title: "Teaching"
     url: /teaching/    
