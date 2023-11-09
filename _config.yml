@@ -81,7 +81,7 @@ analytics:
 # Site Author
 author:
   name             : "Faisal B. Ashraf"
-  avatar           : "profile_pic.jpeg.png"
+  avatar           : "profile_pic.jpeg"
   bio              : "Water Resources Engineer with expertise in flood modeling, ecohydraulics, and hydropower optimization"
   location         : "United States"
   employer         :  "Oak Ridge National Laboratory "
