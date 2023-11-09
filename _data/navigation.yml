@@ -2,7 +2,7 @@
 main:
 
   - title: "Publications"
-    url: /https://scholar.google.com/citations?user=04FzE9EAAAAJ&hl=en&oi=sra/    
+    url: https://scholar.google.com/citations?user=04FzE9EAAAAJ&hl=en&oi=sra/    
 
   - title: "Teaching"
     url: /teaching/    
