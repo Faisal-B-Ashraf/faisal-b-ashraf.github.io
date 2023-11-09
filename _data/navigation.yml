@@ -5,16 +5,18 @@ main:
     url: https://scholar.google.com/citations?user=04FzE9EAAAAJ&hl=en&oi=sra/    
 
   - title: "Teaching"
-    url: /teaching/    
+    url: https://opas.peppi.oulu.fi/en/course/488123S/4989/
     
-  - title: "Portfolio"
-    url: /portfolio/
+    
+  - title: "Projects"
+    url: https://www.sei.org/projects/hydrohazards/#sei-team
+    url: https://www.sei.org/projects/water-in-the-fossil-free-transition/#sei-team
         
   - title: "Blog Posts"
-    url: /year-archive/
+    url: https://www.nessling.fi/en/is-hydropower-homogenizing-our-river-flows/
     
   - title: "CV"
     #url: /cv/
-    url: files/academic_cv__Updated_Nov_2022_.pdf
+    url: /files/academic_cv__Updated_Nov_2022_.pdf
   - title: "Guide"
     url: /markdown/
