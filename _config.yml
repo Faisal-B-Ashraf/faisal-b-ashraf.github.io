@@ -9,7 +9,7 @@
 locale                   : "en-US"
 title                    : "Faisal's Homepage"
 title_separator          : "-"
-name                     : &name "FAisal B. Ashraf"
+name                     : &name "Faisal B. Ashraf"
 description              : &description "personal description"
 url                      : https://https://faisal-b-ashraf.github.io # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
