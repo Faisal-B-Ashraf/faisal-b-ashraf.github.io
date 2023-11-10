@@ -12,7 +12,7 @@ main:
     url: /portfolio/
         
   - title: "Blog Posts"
-    url: /posts/2012-08-14-blog-post-1
+    url: /posts/
     
   - title: "CV"
     #url: /cv/
