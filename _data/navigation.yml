@@ -1,18 +1,17 @@
-# main links links
+# main links
 main:
-
   - title: "Publications"
-    url: https://scholar.google.com/citations?user=04FzE9EAAAAJ&hl=en&oi=sra/    
+    url: https://scholar.google.com/citations?user=04FzE9EAAAAJ&hl=en&oi=sra
 
-   - title: "Teaching"
-    url: /teaching/ 
-    
+  - title: "Teaching"
+    url: /teaching/
+
   - title: "Portfolio"
     url: /portfolio/
-        
+
   - title: "Blog Posts"
     url: /year-archive/
-    
+
   - title: "CV"
     #url: /cv/
     url: /files/academic_cv__Updated_Nov_2022_.pdf
