@@ -30,7 +30,7 @@ jobs:
           rows=[]
           for p in doc:
               rows.append({'page':p.number+1,'blocks':p.get_text('blocks'),'links':p.get_links()})
-          (root/'pdf-layout.json').write_text(json.dumps(rows,indent=2))
+          (root/'pdf-layout.json').write_text(json.dumps(rows,indent=2,default=str))
           doc[0].get_pixmap(matrix=fitz.Matrix(1,1)).save(root/'cover-r02.png')
           PY
       - name: Save review data
