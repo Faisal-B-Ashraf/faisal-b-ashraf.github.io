@@ -196,7 +196,7 @@ export function buildModel(){
  for(const [x,z] of [[18,.35],[32,.35],[46,.35],[53,.35],[65,-.65],[79,-2.3],[90,-3.6],[32,23.5],[46,24],[53,27],[65,27],[79,27],[99,16],[58,43]]){box(pg,x-.4,0,z-.4,.8,8.5,.8,concrete);solids[0].push([x-.65,z-.65,x+.65,z+.65]);}
  for(const [x,z] of [[42,23],[75,28],[91,8]])box(pg,x,8.05,z,3,.08,.35,glow);
  paintArrow(pg,[37,31],[44,28]);paintArrow(pg,[87,3],[99,4.5]);
- sign(pg,36,6,29,7,1,'ENTRY');sign(pg,89,6,6,13,1,'EXIT - ROAD RAMP');
+ sign(pg,36,6,29,7,1,'ENTRY').rotation.y=0;sign(pg,89,6,6,13,1,'EXIT - ROAD RAMP').rotation.y=0;
  // Separate gateways show access intent. Off-plot ramp alignment and rights remain unresolved.
  // Four road-facing shops and independent lobby.
  const rg=levels[1];slab(rg,P,0,1.5,concrete);shop(rg,1,13,32,22,1);shop(rg,1,32,46,24,2);shop(rg,1,65,79,27,3);shop(rg,1,79,120,27,4);core(rg,1,12.5);bathroom(rg,1,53,35.25,8,8);bathroom(rg,1,61,35.25,6,8);shelves(rg,68.5,39.5,5);doorWallZ(rg,1,35.25,68,74,69.5);wall(rg,1,[68,35.25],[68,41.25],9);wall(rg,1,[74,35.25],[74,41.25],9);

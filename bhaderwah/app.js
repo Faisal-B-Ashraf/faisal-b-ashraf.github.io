@@ -8,7 +8,7 @@ import {canOccupy} from './navigation.js';
 const $=s=>document.querySelector(s),app=$('#app'),canvas=$('#scene'),loading=$('#loading');
 loading.innerHTML='<div class="loading-mark"></div><span>Preparing your walkthrough…</span>';
 const floorNames=['Parking','Shops · Road','First floor','Second floor'];
-let activeFloor=-1,mode='orbit',renderer,scene,camera,controls,model,transition=null,drag=null,yaw=0,pitch=0,lastTime=0,keys=new Set(),moveDir=[0,0],frame=0;
+let activeFloor=-1,mode='orbit',renderer,scene,camera,controls,model,transition=null,drag=null,yaw=0,pitch=0,lastTime=0,keys=new Set(),moveDir=[0,0],frame=0,redraw=true;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const spots=[
  [{name:'Parking entry',sub:'Footpath-side arrival',p:[40,29],look:[68,24]},{name:'Parking floor',sub:'Four ordinary bays',p:[76,28.5],look:[88,17]},{name:'Exit to ramp',sub:'Opposite-side connection',p:[88,3.5],look:[100,4.5]},{name:'Passenger lobby',sub:'Stair + passenger lift',p:[49.5,24],look:[56,23]}],
@@ -48,14 +48,14 @@ function updateUI(){
  $('#room-controls').innerHTML='<div class="room-caption">STEP INSIDE</div>'+list.map((s,i)=>`<button class="room-button" data-spot="${i}"><span><b>${s.name}</b><span class="sub">${s.sub}</span></span><span class="arrow">↗</span></button>`).join('');
  $('#room-controls').querySelectorAll('button').forEach(b=>b.onclick=()=>{const s=list[Number(b.dataset.spot)];enterSpot(s.floor,s.index);});
 }
-function visibility(){if(!model)return;const cut=mode!=='walk'&&activeFloor>=0;model.context.visible=!cut;model.roof.visible=!cut;model.levels.forEach((g,i)=>g.visible=!cut||i===activeFloor);}
+function visibility(){if(!model)return;redraw=true;if(renderer)renderer.shadowMap.needsUpdate=true;const cut=mode!=='walk'&&activeFloor>=0;model.context.visible=!cut;model.roof.visible=!cut;model.levels.forEach((g,i)=>g.visible=!cut||i===activeFloor);}
 function selectFloor(i){activeFloor=i;if(i<0&&mode==='walk')mode='orbit';if(mode==='walk'){enterSpot(i,0);return;}visibility();updateUI();overview();}
 function selectMode(m){if(m===mode)return;mode=m;if(m==='walk'){enterSpot(activeFloor<0?1:activeFloor,0);return;}if(m==='plan'&&activeFloor<0)activeFloor=2;controls.enabled=true;drag=null;visibility();updateUI();overview();}
 function animateTo(position,target,duration=850){transition={start:performance.now(),duration:reduced?0:duration,from:camera.position.clone(),to:new THREE.Vector3(...position),fromTarget:controls.target.clone(),toTarget:new THREE.Vector3(...target)};}
 function overview(){if(!camera)return;controls.enabled=true;const y=activeFloor>=0?LEVELS[activeFloor]:11;camera.fov=45;camera.updateProjectionMatrix();controls.minDistance=8;controls.maxDistance=260;controls.maxPolarAngle=Math.PI*.485;
  if(activeFloor<0)animateTo([145,79,-119],[59,9,17]);else if(mode==='plan')animateTo([77,y+109,70],[59,y,19]);else animateTo([136,y+74,-78],[61,y+2,19]);}
 function enterSpot(f,i){activeFloor=f;mode='walk';const s=spots[f][i];controls.enabled=false;transition=null;camera.fov=65;camera.updateProjectionMatrix();camera.position.set(s.p[0],LEVELS[f]+5.45,s.p[1]);const dx=s.look[0]-s.p[0],dz=s.look[1]-s.p[1];yaw=Math.atan2(-dx,-dz);pitch=-.045;look();visibility();updateUI();$('#map-label').textContent=floorNames[f].toUpperCase()+' · YOU ARE HERE';}
-function look(){camera.rotation.order='YXZ';camera.rotation.set(pitch,yaw,0);}
+function look(){camera.rotation.order='YXZ';camera.rotation.set(pitch,yaw,0);redraw=true;}
 function canMove(x,z){return canOccupy(x,z,activeFloor,model);}
 function walk(dt){
  let mx=moveDir[0]+(keys.has('d')||keys.has('arrowright')?1:0)-(keys.has('a')||keys.has('arrowleft')?1:0),mz=moveDir[1]+(keys.has('s')||keys.has('arrowdown')?1:0)-(keys.has('w')||keys.has('arrowup')?1:0);
@@ -70,14 +70,14 @@ function optimize(g){
  g.traverse(o=>{if(!o.isMesh)return;let geo=o.geometry.clone();if(geo.index)geo=geo.toNonIndexed();geo.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inverse,o.matrixWorld));const key=o.material.uuid;if(!byMat.has(key))byMat.set(key,{material:o.material,geos:[]});byMat.get(key).geos.push(geo);});
  g.clear();for(const {material,geos} of byMat.values()){const geo=mergeGeometries(geos,false);if(!geo)throw Error('Geometry merge failed');const m=new THREE.Mesh(geo,material);m.castShadow=!material.transparent;m.receiveShadow=true;g.add(m);geos.forEach(x=>x.dispose());}
 }
-function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+function resize(){redraw=true;const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
 function tick(time){requestAnimationFrame(tick);const dt=Math.min((time-lastTime)/1000,.04)||.016;lastTime=time;frame++;if(document.hidden||$('.modal.open'))return;
- if(mode==='walk')walk(dt);else if(transition){const f=transition.duration?THREE.MathUtils.clamp((time-transition.start)/transition.duration,0,1):1,t=f*f*(3-2*f);camera.position.lerpVectors(transition.from,transition.to,t);controls.target.lerpVectors(transition.fromTarget,transition.toTarget,t);if(f===1)transition=null;controls.update();}else controls.update();renderer.render(scene,camera);
+ if(mode==='walk'){const x=camera.position.x,z=camera.position.z;walk(dt);if(x!==camera.position.x||z!==camera.position.z)redraw=true;}else if(transition){redraw=true;const f=transition.duration?THREE.MathUtils.clamp((time-transition.start)/transition.duration,0,1):1,t=f*f*(3-2*f);camera.position.lerpVectors(transition.from,transition.to,t);controls.target.lerpVectors(transition.fromTarget,transition.toTarget,t);if(f===1)transition=null;controls.update();}else if(controls.update())redraw=true;if(redraw){renderer.render(scene,camera);redraw=false;}
 }
 function failure(error){console.error('Walkthrough unavailable',error);loading.remove();canvas.style.display='none';app.insertAdjacentHTML('afterbegin','<img class="fallback-image" src="exterior.png" alt="Bhaderwah exterior rendering">');app.insertAdjacentHTML('beforeend','<div class="error-copy"><h2>The design is ready to view.</h2><p>This browser could not start the 3D viewer. Try an up-to-date Chrome, Safari or Edge with graphics enabled.</p><a href="Bhaderwah_Concept_R03.pdf" target="_blank" rel="noopener">Open the full floor plans ↗</a></div>');$('#view-controls').style.display='none';$('#room-controls').style.display='none';document.querySelectorAll('.mode-controls,.right-tools,#instructions').forEach(x=>x.style.display='none');}
 async function start(){
  try{
-  initUI();renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.65));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.13;
+  initUI();renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.65));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.13;
   scene=new THREE.Scene();scene.background=new THREE.Color('#d5ded8');scene.fog=new THREE.Fog('#d5ded8',220,490);camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,.06,800);camera.position.set(145,79,-119);controls=new OrbitControls(camera,canvas);controls.target.set(59,9,17);controls.enableDamping=true;controls.dampingFactor=.09;controls.addEventListener('start',()=>transition=null);
   const pmrem=new THREE.PMREMGenerator(renderer),env=new RoomEnvironment();scene.environment=pmrem.fromScene(env,.04).texture;env.dispose();pmrem.dispose();scene.environmentIntensity=.55;
   scene.add(new THREE.HemisphereLight('#f3f7eb','#a5ab91',2.15));const sun=new THREE.DirectionalLight('#fff3d9',3.6);sun.position.set(-10,125,-55);sun.target.position.set(55,8,15);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-110,right:110,top:100,bottom:-100,near:1,far:260});sun.shadow.normalBias=.065;sun.shadow.bias=-.00007;scene.add(sun,sun.target);
