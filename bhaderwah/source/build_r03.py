@@ -136,6 +136,8 @@ def fontpage(p):
 def area(p,box,text,size=9.3,fill=paper):
  r=fitz.Rect(box);p.add_redact_annot(r,fill=fill);p.apply_redactions(images=0,graphics=0)
  fontpage(p);ret=p.insert_textbox(r,text,fontname='FRegular',fontsize=size,lineheight=1.25,color=gray)
+ while ret<0 and size>8.5:
+  size-=.2;ret=p.insert_textbox(r,text,fontname='FRegular',fontsize=size,lineheight=1.25,color=gray)
  assert ret>=0, ('Text overflow',box,text,ret)
 def phrase(p,old,new,size=9.3):
  rr=p.search_for(old)
