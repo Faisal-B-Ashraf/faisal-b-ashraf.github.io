@@ -1,0 +1,21 @@
+{
+  "url": "https://faisal-b-ashraf.github.io/bhaderwah/",
+  "http_status": 200,
+  "verified_assets": [
+    "index.html",
+    "app.js",
+    "model.js",
+    "navigation.js",
+    "style.css",
+    "exterior.png",
+    "Bhaderwah_Concept_R03.pdf",
+    "Bhaderwah_R03_Website.zip",
+    "lib/three.module.js",
+    "lib/three.core.js",
+    "lib/addons/controls/OrbitControls.js",
+    "lib/addons/environments/RoomEnvironment.js",
+    "lib/addons/utils/BufferGeometryUtils.js",
+    "third-party-notices.txt"
+  ],
+  "homepage_status": 200
+}
