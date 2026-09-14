@@ -1,0 +1,49 @@
+name: Verify published Bhaderwah site
+on:
+  push:
+    branches: [bhaderwah-recovery]
+    paths: [.github/workflows/bhaderwah-livecheck.yml]
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify the GitHub Pages URL and delivered files
+        run: |
+          python3 - <<'PY'
+          import urllib.request,hashlib,time,json,pathlib
+          root=pathlib.Path('bhaderwah')
+          base='https://faisal-b-ashraf.github.io/bhaderwah/'
+          names=['index.html','app.js','model.js','navigation.js','style.css','exterior.png','Bhaderwah_Concept_R03.pdf','Bhaderwah_R03_Website.zip','lib/three.module.js','lib/three.core.js','lib/addons/controls/OrbitControls.js','lib/addons/environments/RoomEnvironment.js','lib/addons/utils/BufferGeometryUtils.js','third-party-notices.txt']
+          success=False
+          for attempt in range(22):
+              try:
+                  checked=[]
+                  for name in names:
+                      request=urllib.request.Request(base+name,headers={'User-Agent':'Bhaderwah-publication-check/1.0','Cache-Control':'no-cache'})
+                      with urllib.request.urlopen(request,timeout=30) as response:
+                          actual=response.read()
+                          assert response.status==200
+                      expected=(root/name).read_bytes()
+                      assert hashlib.sha256(actual).digest()==hashlib.sha256(expected).digest(), 'Pending asset: '+name
+                      checked.append(name)
+                  with urllib.request.urlopen('https://faisal-b-ashraf.github.io/',timeout=30) as r:assert r.status==200
+                  (root/'review/live-check.json').write_text(json.dumps({'url':base,'http_status':200,'verified_assets':checked,'homepage_status':200},indent=2))
+                  print('LIVE VERIFIED:',base,'—',len(checked),'assets match the reviewed revision')
+                  success=True
+                  break
+              except Exception as e:
+                  print('Waiting for Pages deployment:',type(e).__name__,str(e),flush=True)
+                  if attempt<21:time.sleep(20)
+          assert success,'GitHub Pages did not deliver the reviewed revision within this check'
+          PY
+      - name: Record publication verification
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- bhaderwah/review/live-check.json
+          git commit -m "Verify live Bhaderwah GitHub Pages publication"
+          git push origin HEAD:bhaderwah-recovery
