@@ -148,7 +148,7 @@ export function buildModel(){
   outline(g,idx,poly,11,(a,b)=>{
    const onRoad=Math.abs(a[1]-roadZ(a[0]))<.02&&Math.abs(b[1]-roadZ(b[0]))<.02;
    if(onRoad){const len=Math.hypot(b[0]-a[0],b[1]-a[1]);return[[.7,Math.max(1,len-5.1),.15,8.7,'window'],[Math.max(2,len-4.15),3.3,0,8.8,'open']];}
-   if(a[1]===z1&&b[1]===z1&&num>1){return[[1.2,3,0,7,'door']];}return[];
+   if(a[1]===z1&&b[1]===z1&&num>1){const x=[0,0,41.8,72,81.5][num];return[[a[0]>b[0]?a[0]-x-3:x-a[0],3,0,7,'door']];}return[];
   });
 
   if(num===1){

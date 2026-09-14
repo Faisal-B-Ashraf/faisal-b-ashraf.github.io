@@ -1,0 +1,28 @@
+name: Build and review Bhaderwah R03
+on:
+  push:
+    branches: [bhaderwah-recovery]
+    paths: [.github/workflows/bhaderwah-build.yml, bhaderwah/source/build_r03.py, bhaderwah/source/verify_viewer.py]
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install presentation tools
+        run: |
+          python3 -m pip install --quiet PyMuPDF reportlab qrcode Pillow playwright
+          python3 -m playwright install --with-deps chromium
+      - name: Build coordinated plans
+        run: python3 bhaderwah/source/build_r03.py
+      - name: Render and check the interactive model
+        run: python3 bhaderwah/source/verify_viewer.py
+      - name: Save completed revision and visual review
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- bhaderwah
+          git commit -m "Build coordinated R03 plans and verify furnished walkthrough"
+          git push origin HEAD:bhaderwah-recovery
