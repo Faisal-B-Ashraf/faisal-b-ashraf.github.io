@@ -1,0 +1,67 @@
+[
+  {
+    "path": "bhaderwah/index.html",
+    "sha256": "447022dda287e8f65c9c99fb60bec28fea8780cb82d92aa08cebf36e480594bc",
+    "bytes": 2313
+  },
+  {
+    "path": "bhaderwah/app.js",
+    "sha256": "4f13f09c70010683f30b335f6b43b4bec2c784af0929755975178a5913e82f94",
+    "bytes": 18273
+  },
+  {
+    "path": "bhaderwah/model.js",
+    "sha256": "97e70d0b5433859ebc958950c8f001b02092ed20947956a28ad078cb7cf42367",
+    "bytes": 23251
+  },
+  {
+    "path": "bhaderwah/navigation.js",
+    "sha256": "059585ce14240d43bc2808f45f4a5c8c772dacde247fa7fef8c6a48f1ad1340b",
+    "bytes": 828
+  },
+  {
+    "path": "bhaderwah/style.css",
+    "sha256": "f5f9060553ff05fe78718ae2c732a3dcf546e64c607adf22597ea5d6324a4195",
+    "bytes": 9998
+  },
+  {
+    "path": "bhaderwah/exterior.png",
+    "sha256": "62e6502617b767bf3a2a6478acb784429ee909a930dda7cd4be7d0aa73f0285c",
+    "bytes": 2939586
+  },
+  {
+    "path": "bhaderwah/Bhaderwah_Concept_R02.pdf",
+    "sha256": "24a8f33023eb340e97932173b0d11f4ce60c5cded4007cf2cb4f745b762b5e84",
+    "bytes": 5666512
+  },
+  {
+    "path": "bhaderwah/lib/three.module.js",
+    "sha256": "c8211c69345d2e9949dc7a8ac969380497aa0600a5a8ac6a459c8cd02dd9cb8a",
+    "bytes": 603113
+  },
+  {
+    "path": "bhaderwah/lib/three.core.js",
+    "sha256": "eb077d2417f61d3e6d9264c317cabc4ea35769ed6b0ab533067292a550784c20",
+    "bytes": 1403455
+  },
+  {
+    "path": "bhaderwah/lib/addons/controls/OrbitControls.js",
+    "sha256": "b97879c748170baadeb3fb84cea1ffdf4674e283dc06042f34e2acb95a76042c",
+    "bytes": 38703
+  },
+  {
+    "path": "bhaderwah/lib/addons/environments/RoomEnvironment.js",
+    "sha256": "c20f0b4677f6128a138d7152b85cbef9091f4f45cdfa05adca04d40c1697c7ae",
+    "bytes": 4899
+  },
+  {
+    "path": "bhaderwah/lib/addons/utils/BufferGeometryUtils.js",
+    "sha256": "748066188940e858e5d48985866e84a6e6691fc31776ea59d9d89c1a7f6fe6cd",
+    "bytes": 35555
+  },
+  {
+    "path": "bhaderwah/lib/LICENSE",
+    "sha256": "bfe119ea4fd413f5f7ca3fcd63adb0c4a073ed39daa2fe7d3e6b769e21272601",
+    "bytes": 1081
+  }
+]
