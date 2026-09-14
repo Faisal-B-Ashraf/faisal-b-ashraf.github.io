@@ -1,0 +1,49 @@
+name: Recover Bhaderwah presentation
+on:
+  push:
+    branches: [bhaderwah-recovery]
+    paths: [.github/workflows/bhaderwah-recover.yml]
+permissions:
+  contents: write
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recover the existing public presentation
+        run: |
+          python3 - <<'PY'
+          import urllib.request, pathlib, hashlib, json
+          base = 'https://bhaderwah-house-walkthrough.faisal90.chatgpt.site/'
+          files = ['index.html','app.js','model.js','navigation.js','style.css','exterior.png','Bhaderwah_Concept_R02.pdf','vendor/three.module.js','vendor/three.core.js','vendor/addons/controls/OrbitControls.js','vendor/addons/environments/RoomEnvironment.js','vendor/addons/utils/BufferGeometryUtils.js','vendor/LICENSE']
+          root = pathlib.Path('bhaderwah')
+          assert not root.exists(), 'Refuse to replace an existing presentation'
+          manifest = []
+          for name in files:
+              req = urllib.request.Request(base+name, headers={'User-Agent':'Bhaderwah-site-migration/1.0'})
+              with urllib.request.urlopen(req, timeout=45) as r:
+                  data = r.read(15000000)
+                  assert r.status == 200
+                  assert urllib.request.urlparse(r.url).hostname == urllib.request.urlparse(base).hostname if hasattr(urllib.request, 'urlparse') else True
+              if name.endswith('.pdf'): assert data.startswith(b'%PDF'), 'Invalid PDF'
+              elif name.endswith('.png'): assert data.startswith(b'\x89PNG'), 'Invalid PNG'
+              elif name.endswith('.js'): assert b'<html' not in data[:1000].lower(), 'Expected JavaScript'
+              elif name == 'index.html': assert b'app.js' in data, 'Expected walkthrough HTML'
+              dest = root / name.replace('vendor/', 'lib/')
+              dest.parent.mkdir(parents=True, exist_ok=True)
+              if name.endswith(('.html','.js')):
+                  data = data.decode().replace('./vendor/','./lib/').encode()
+              dest.write_bytes(data)
+              manifest.append({'path':str(dest),'sha256':hashlib.sha256(data).hexdigest(),'bytes':len(data)})
+          (root/'third-party-notices.txt').write_bytes((root/'lib/LICENSE').read_bytes())
+          (root/'recovery-manifest.json').write_text(json.dumps(manifest, indent=2))
+          print('Recovered',len(manifest),'presentation assets')
+          PY
+      - name: Save recovered presentation on the recovery branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- bhaderwah
+          git commit -m "Recover existing Bhaderwah presentation for revision"
+          git push origin HEAD:bhaderwah-recovery
