@@ -1,0 +1,42 @@
+name: Check Bhaderwah revision
+on:
+  push:
+    branches: [bhaderwah-recovery]
+    paths: [.github/workflows/bhaderwah-check.yml]
+permissions:
+  contents: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet PyMuPDF
+      - name: Check model and recover PDF layout
+        run: |
+          node --check bhaderwah/model.js
+          node --check bhaderwah/app.js
+          node --input-type=module - <<'JS'
+          import {buildModel} from './bhaderwah/model.js';
+          import {canOccupy} from './bhaderwah/navigation.js';
+          const model=buildModel();
+          for(const [x,z,f] of [[28.5,3,1],[42.5,4,1],[76,6,1],[88,3,1],[40,29,0],[88,3.5,0]])if(!canOccupy(x,z,f,model))throw Error('Blocked shop / parking start: '+[x,z,f]);
+          console.log('Revised shop and parking arrivals are walkable');
+          JS
+          python3 - <<'PY'
+          import fitz,json,pathlib
+          root=pathlib.Path('bhaderwah/review');root.mkdir(exist_ok=True)
+          doc=fitz.open('bhaderwah/Bhaderwah_Concept_R02.pdf')
+          rows=[]
+          for p in doc:
+              rows.append({'page':p.number+1,'blocks':p.get_text('blocks'),'links':p.get_links()})
+          (root/'pdf-layout.json').write_text(json.dumps(rows,indent=2))
+          doc[0].get_pixmap(matrix=fitz.Matrix(1,1)).save(root/'cover-r02.png')
+          PY
+      - name: Save review data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- bhaderwah/review
+          git commit -m "Save PDF layout for coordinated Bhaderwah revision"
+          git push origin HEAD:bhaderwah-recovery

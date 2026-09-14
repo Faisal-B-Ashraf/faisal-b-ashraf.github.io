@@ -31,7 +31,7 @@ function texture(type){
  const t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(type==='wood'?1:.5,type==='wood'?1:.5);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;return t;
 }
 export function buildModel(){
- const root=new THREE.Group();root.name='Bhaderwah concept R02';
+ const root=new THREE.Group();root.name='Bhaderwah concept R03';
  const context=new THREE.Group(),levels=LEVELS.map((y,i)=>{const g=new THREE.Group();g.position.y=y;g.name=['Lower parking','Road retail','First floor','Second floor'][i];root.add(g);return g;}),roof=new THREE.Group();root.add(context,roof);
  const walls=LEVELS.map(()=>[]),solids=LEVELS.map(()=>[]),doors=[];
  const ivory=mat('#e7e0d2'),plaster=mat('#f5f0e6'),oak=mat('#b48b58'),bronze=mat('#414f49',.36,{metalness:.5}),roofmat=mat('#3d4749',.46,{metalness:.65}),stone=mat('#a7a69a'),tile=mat('#e2e0d8'),concrete=mat('#b8b9b4'),fabric=mat('#c9bba7'),white=mat('#f7f4ed'),dark=mat('#353c3b'),green=mat('#6a7b60'),brass=mat('#aa8954',.35,{metalness:.7});
@@ -133,6 +133,16 @@ export function buildModel(){
   plant(g,50.5,27.5,0,.9);pendant(g,49.5,10,idx===1?9.8:8);
  }
  function shelves(g,x,z,w=6,d=.9){box(g,x,0,z,w,6.5,.16,oak);for(let j=0;j<4;j++){box(g,x,.8+j*1.45,z,w,.1,d,oak);for(let n=0;n<Math.floor(w/.65);n++){const m=mat(['#b4a68d','#d9d3bd','#778c7e','#b79470'][n%4]);box(g,x+.15+n*.65,.92+j*1.45,z+.13,.42,.7+(n%3)*.12,.45,m);}}}
+
+ function sign(g,x,y,z,w,h,label,bg='#355c50',fg='#fff6df'){
+  let material=mat(bg);if(typeof document!=='undefined'){const cv=document.createElement('canvas');cv.width=1024;cv.height=192;const ctx=cv.getContext('2d');ctx.fillStyle=bg;ctx.fillRect(0,0,1024,192);ctx.fillStyle=fg;ctx.font='bold 76px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,512,98,970);const tex=new THREE.CanvasTexture(cv);tex.colorSpace=THREE.SRGBColorSpace;material=new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide});}
+  const panel=new THREE.Mesh(new THREE.PlaneGeometry(w,h),material);panel.position.set(x+w/2,y+h/2,z);panel.rotation.y=Math.PI;g.add(panel);return panel;
+ }
+ function sideRack(g,x,z,length=12){const rack=new THREE.Group();g.add(rack);rack.position.set(x,0,z);rack.rotation.y=Math.PI/2;shelves(rack,0,0,length,1.1);}
+ function checkout(g,x,z,w,d=2.2,col=green){box(g,x,.1,z,w,3.1,d,col);box(g,x-.05,3.2,z-.05,w+.1,.12,d+.1,white);box(g,x+w-.95,3.35,z+.65,.8,.5,.12,dark);box(g,x+w-1,3.3,z+.35,.9,.06,.55,bronze);}
+ function gondola(g,x,z,w,d){box(g,x,0,z,w,.25,d,bronze);box(g,x+w/2-.08,.25,z,.16,4.9,d,oak);for(let k=0;k<3;k++){box(g,x,.65+k*1.45,z,w,.09,d,oak);for(let n=0;n<Math.floor(d/.65);n++)for(const xx of [x+.1,x+w-.5])box(g,xx,.76+k*1.45,z+.1+n*.65,.38,.65,.45,mat(['#c29359','#d1d1b8','#719885','#b49a7c'][n%4]));}}
+ function paintArrow(g,a,b){const dx=b[0]-a[0],dz=b[1]-a[1],n=Math.hypot(dx,dz),ux=dx/n,uz=dz/n;beam(g,a,b,.055,.025,.22,white);beam(g,b,[b[0]-ux*2-uz,b[1]-uz*2+ux],.055,.025,.22,white);beam(g,b,[b[0]-ux*2+uz,b[1]-uz*2-ux],.055,.025,.22,white);}
+
  function shop(g,idx,x0,x1,z1,num){
   const poly=clip(P,x0,x1,-10,z1);slab(g,poly,.035,.035,tilefloor);
   outline(g,idx,poly,11,(a,b)=>{
@@ -140,10 +150,32 @@ export function buildModel(){
    if(onRoad){const len=Math.hypot(b[0]-a[0],b[1]-a[1]);return[[.7,Math.max(1,len-5.1),.15,8.7,'window'],[Math.max(2,len-4.15),3.3,0,8.8,'open']];}
    if(a[1]===z1&&b[1]===z1&&num>1){return[[1.2,3,0,7,'door']];}return[];
   });
-  if(num===1){kitchen(g,25,18,6);table(g,22,5,2.4,2.4,2.55);chair(g,23.2,8.3);chair(g,23.2,3.9,Math.PI);table(g,27.5,10,2.4,2.4,2.55);chair(g,28.7,13.3);chair(g,28.7,8.9,Math.PI);pendant(g,23.2,6.2,9.4);pendant(g,28.7,11.2,9.4);plant(g,28,2);shelves(g,30.5,15,1,.8);}
-  else if(num===2){shelves(g,33,20.5,10);shelves(g,32.5,6,1,5);table(g,36,10,4,5,2.8);box(g,41,1.7,18,3.7,1.4,2.4,green);plant(g,34,2);pendant(g,39,10,9.5);}
-  else if(num===3){shelves(g,65.6,22.3,12);shelves(g,65.5,6,1,5.5);table(g,69,9,5,4,2.8);box(g,74,0,18,4,3.2,2.3,oak);plant(g,66.5,1.7);pendant(g,72,11,9.5);}
-  else {shelves(g,82,24.5,11);table(g,85,13,6,4,2.75);shelves(g,98,17,3);box(g,93,0,21,4.5,3.3,2.2,green);plant(g,81,1);pendant(g,88,14,9.5);}
+
+  if(num===1){
+   checkout(g,25,18,6,2.2,oak);box(g,25.6,3.4,18.4,2.2,1.25,.9,bronze);for(let j=0;j<3;j++)cyl(g,28.4+j*.45,3.4,18.9,.17,.35,white);
+   box(g,25,.1,14.4,6,2.2,2.25,oak);box(g,25,2.3,14.4,6,1.45,2.25,glass);box(g,25,3.75,14.4,6,.08,2.25,bronze);
+   for(let n=0;n<8;n++)orb(g,25.6+(n%4)*1.35,2.65,14.9+Math.floor(n/4)*.95,.3,mat('#c88e4d'),.65);
+   table(g,22,5,2.4,2.4,2.55);chair(g,23.2,8.3);chair(g,23.2,3.9,Math.PI);table(g,27.5,10,2.4,2.4,2.55);chair(g,28.7,13.3);chair(g,28.7,8.9,Math.PI);
+   sign(g,24.5,6.4,21.65,7,1.2,'COFFEE + FRESH BAKES','#463d32');pendant(g,23.2,6.2,9.4);pendant(g,28.7,11.2,9.4);plant(g,28,2);
+  }else if(num===2){
+   sideRack(g,32.65,18,12);gondola(g,36,9,2,7);
+   box(g,33,.1,20,5.5,2.6,2.5,oak);
+   for(let n=0;n<2;n++){box(g,33.35+n*2.7,2.7,20.2,2,1.4,1.9,white);box(g,33.5+n*2.7,4.1,20.35,1.7,.12,1.35,dark);box(g,33.6+n*2.7,3.45,20.05,1.4,.12,.18,bronze);}
+   checkout(g,40.5,20,4.4);sign(g,33,6.5,23.7,11,1.1,'PRINT / COPY / BIND','#355b6a');pendant(g,39,10,9.5);
+  }else if(num===3){
+   sideRack(g,65.6,20,14);gondola(g,70,7,2.4,10);
+   box(g,75.5,.1,1,2.8,6.5,2.25,white);box(g,75.65,.6,.96,2.5,5.7,.05,glass);
+   for(let j=0;j<4;j++){box(g,75.7,.9+j*1.3,1.1,2.4,.07,1.7,bronze);for(let k=0;k<5;k++)cyl(g,75.9+k*.43,1+j*1.3,1.6,.14,.7,mat(k%2?'#779d77':'#cda164'));}
+   box(g,66,.2,3,2.5,2.4,2.3,oak);for(let n=0;n<9;n++)orb(g,66.4+n%3*.7,2.7,3.4+Math.floor(n/3)*.7,.24,mat(n%2?'#a2aa62':'#c69d62'));
+   checkout(g,74.2,20,4.1,2.3);sign(g,66,6.8,26.6,11.5,1,'EVERYDAY ESSENTIALS');pendant(g,72,11,9.5);
+  }else{
+   shelves(g,82,24.6,12);gondola(g,80.6,12,1.5,8);checkout(g,84,17,11,2.5,white);box(g,84,.4,16.96,11,.5,.05,green);
+   box(g,98,.1,17,2.2,6.5,2.2,white);box(g,98.15,2.6,16.95,1.9,.13,.03,bronze);
+   sign(g,84,6.7,24.4,11,1.2,'DISPENSING + HEALTH');
+   box(g,85,6.1,roadZ(85)+.15,1.3,3,.14,green);box(g,84.15,6.95,roadZ(85)+.08,3,1.3,.14,green);pendant(g,89,12,9.5);
+  }
+  const sx=[15.5,33,66,80][num-1],sw=[15,12,11.5,10][num-1];
+  sign(g,sx,9.15,roadZ(sx)-.28,sw,.82,['CAFE & BAKERY','PRINT & STATIONERY','DAILY NEEDS','PHARMACY'][num-1],['#63513b','#355b6a','#58664c','#355c50'][num-1]);
   return poly;
  }
  function car(g,x,z,turn,color){const cg=new THREE.Group();g.add(cg);cg.position.set(x,.1,z);cg.rotation.y=turn;box(cg,-3.1,.7,-7.4,6.2,1.8,14.8,mat(color,.25,{metalness:.4}));box(cg,-2.7,2.4,-3.5,5.4,2.1,7.5,mat(color,.3,{metalness:.4}));box(cg,-2.58,2.72,-3.58,5.16,1.38,.06,mirror);box(cg,-2.58,2.72,4.02,5.16,1.38,.06,mirror);for(const xx of [-3.32,3.32]){box(cg,xx,2.72,-3.18,.03,1.38,6.7,mirror);for(const zz of [-4.8,4.8]){const tire=cyl(cg,xx,.7,zz,1.06,.45,dark);tire.rotation.z=Math.PI/2;tire.position.y=1.05;const hub=cyl(cg,xx+Math.sign(xx)*.25,.7,zz,.6,.46,bronze);hub.rotation.z=Math.PI/2;hub.position.y=1.05;}}box(cg,-2.7,1.5,-7.45,1.25,.45,.07,glow);box(cg,1.45,1.5,-7.45,1.25,.45,.07,glow);return cg;}
@@ -158,11 +190,14 @@ export function buildModel(){
  for(const [x,z,s] of [[-13,25,1],[6,38,1.1],[37,59,.9],[117,19,1.1],[109,61,1.3],[130,76,1.5],[-25,63,1.8],[65,93,2.1]]){cyl(context,x,-10.5,z,.55*s,12*s,oak);for(let j=0;j<3;j++)orb(context,x+(j-1)*1.6*s,(3+j*3)*s-5,z+Math.sin(j)*2*s,4.5*s,mat(j===1?'#718267':'#899879'),1.3);}
  // Lower level with four ordinary bays and an assumed open side connection.
  const pg=levels[0];slab(pg,P,0,.65,concrete);
- P.forEach((a,i)=>{const b=P[(i+1)%P.length];if(i<2)return;const L=Math.hypot(b[0]-a[0],b[1]-a[1]);if(i===6)wall(pg,0,a,b,8.5,.65,stone,[[10.5,17,0,8.5,'open']]);else wall(pg,0,a,b,8.5,.65,stone);});
+ P.forEach((a,i)=>{const b=P[(i+1)%P.length];if(i<2)return;const L=Math.hypot(b[0]-a[0],b[1]-a[1]);if(i===6)wall(pg,0,a,b,8.5,.65,stone,[[10.5,17,0,8.5,'open']]);else if(i===2)wall(pg,0,a,b,8.5,.65,stone,[[6,14,0,8.5,'open']]);else wall(pg,0,a,b,8.5,.65,stone);});
  for(const [x,z,w,d] of [[83,7,17,8.5],[81,16.5,17,8.5],[59,33,17,8.5],[34.5,2,8.5,17]]){for(const [a,b] of [[[x,z],[x+w,z]],[[x+w,z],[x+w,z+d]],[[x+w,z+d],[x,z+d]],[[x,z+d],[x,z]]])beam(pg,a,b,.02,.025,.13,mat('#ebe8d8'));}
  car(pg,91.5,11.25,Math.PI/2,'#dee0d7');car(pg,89.5,20.75,Math.PI/2,'#627e80');car(pg,67.5,37.25,Math.PI/2,'#a99b84');car(pg,38.75,10.5,0,'#a7afb3');core(pg,0,10);
  for(const [x,z] of [[18,.35],[32,.35],[46,.35],[53,.35],[65,-.65],[79,-2.3],[90,-3.6],[32,23.5],[46,24],[53,27],[65,27],[79,27],[99,16],[58,43]]){box(pg,x-.4,0,z-.4,.8,8.5,.8,concrete);solids[0].push([x-.65,z-.65,x+.65,z+.65]);}
  for(const [x,z] of [[42,23],[75,28],[91,8]])box(pg,x,8.05,z,3,.08,.35,glow);
+ paintArrow(pg,[37,31],[44,28]);paintArrow(pg,[87,3],[99,4.5]);
+ sign(pg,36,6,29,7,1,'ENTRY');sign(pg,89,6,6,13,1,'EXIT - ROAD RAMP');
+ // Separate gateways show access intent. Off-plot ramp alignment and rights remain unresolved.
  // Four road-facing shops and independent lobby.
  const rg=levels[1];slab(rg,P,0,1.5,concrete);shop(rg,1,13,32,22,1);shop(rg,1,32,46,24,2);shop(rg,1,65,79,27,3);shop(rg,1,79,120,27,4);core(rg,1,12.5);bathroom(rg,1,53,35.25,8,8);bathroom(rg,1,61,35.25,6,8);shelves(rg,68.5,39.5,5);doorWallZ(rg,1,35.25,68,74,69.5);wall(rg,1,[68,35.25],[68,41.25],9);wall(rg,1,[74,35.25],[74,41.25],9);
  for(const x of [8,35,44,77])if(inside(x,Math.max(5,x*.65)))plant(rg,x,Math.max(5,x*.65),0,1.1);
@@ -187,7 +222,7 @@ export function buildModel(){
  // Solid furniture keeps first-person travel out of beds, cabinets and parked cars.
  for(const i of [0,1,2])solids[i].push([53.45,2.5,64.55,18.5]);
  solids[0].push([84,8,99,14.5],[82,17.5,97,24],[60,34,75,40.5],[35.5,3,42,18]);
- solids[1].push([25,18,31,20.2],[22,5,24.4,7.4],[27.5,10,29.9,12.4],[36,10,40,15],[41,18,44.7,20.4],[69,9,74,13],[74,18,78,20.3],[85,13,91,17],[93,21,97.5,23.2]);
+ solids[1].push([25,18,31,20.2],[25,14.4,31,16.65],[22,5,24.4,7.4],[27.5,10,29.9,12.4],[32.65,6,33.75,18],[36,9,38,16],[33,20,38.5,22.5],[40.5,20,44.9,22.2],[65.6,6,66.7,20],[70,7,72.4,17],[75.5,1,78.3,3.25],[66,3,68.5,5.3],[74.2,20,78.3,22.3],[80.6,12,82.1,20],[84,17,95,19.5],[98,17,100.2,19.2],[82,24.6,94,25.5]);
  for(const i of [2,3])solids[i].push([22.9,2.1,28.1,8.8],[33,2,39,4.8],[35,6.3,38.3,8.4],[35.5,10.4,38.7,13.6],[43.8,7,45.4,12.3],[40.5,16,45.5,18.2],[66.4,1.4,71.6,8.1],[73,1.5,78,4.3],[74,7.3,77.3,9.4],[74.7,12.3,77.2,14.8],[72,21.5,78,23.7],[81.4,.9,86.6,7.6],[81,14,87,16.8],[83,18,86.3,20.1],[91,18.2,94.2,21.4],[97,13,103.5,15.2],[87.5,1,90,2.7]);
  return {root,context,levels,roof,walls,solids,doors};
 }
