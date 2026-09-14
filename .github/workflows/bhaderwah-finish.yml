@@ -1,0 +1,74 @@
+name: Finish Bhaderwah presentation details
+on:
+  push:
+    branches: [bhaderwah-recovery]
+    paths: [.github/workflows/bhaderwah-finish.yml]
+permissions:
+  contents: write
+jobs:
+  finish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          python3 -m pip install --quiet PyMuPDF reportlab qrcode Pillow playwright
+          python3 -m playwright install --with-deps chromium
+      - name: Coordinate final presentation details
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('bhaderwah/source/build_r03.py');s=p.read_text()
+          s=s.replace("p.add_redact_annot(fitz.Rect(sp['bbox']),fill=paper)","p.add_redact_annot(fitz.Rect(sp['bbox']),fill=(1,1,1) if p.number==0 else paper)")
+          s=s.replace("'Separate parking entry and exit; proposed road ramp.',9.5)","'Separate parking entry and exit; proposed road ramp.',9.5,fill=(1,1,1))")
+          s=s.replace("'faisal-b-ashraf.github.io/bhaderwah/',8.5)","'faisal-b-ashraf.github.io/bhaderwah/',8.5,fill=(1,1,1))")
+          s=s.replace("area(p,(r.x0,r.y0-1,1140,r.y1+17),new,size)","bg=p.get_pixmap(clip=fitz.Rect(1100,r.y0-3,1101,r.y0-2),alpha=False).pixel(0,0)\n area(p,(r.x0,r.y0-1,1140,r.y1+17),new,size,fill=tuple(v/255 for v in bg))")
+          p.write_text(s)
+          p=Path('bhaderwah/model.js');s=p.read_text()
+          assert "sign(g,24.5,6.4,21.65,7,1.2,'COFFEE + FRESH BAKES'" in s
+          p.write_text(s.replace("sign(g,24.5,6.4,21.65,7,1.2,'COFFEE + FRESH BAKES'","sign(g,26.5,6.4,21.65,4.8,1.2,'COFFEE + BAKES'"))
+          PY
+          node --check bhaderwah/model.js
+          python3 bhaderwah/source/build_r03.py
+      - name: Check corrected cafe sign and package final assets
+        run: |
+          python3 - <<'PY'
+          import subprocess,io,base64,zipfile
+          from pathlib import Path
+          from PIL import Image
+          from playwright.sync_api import sync_playwright
+          root=Path('bhaderwah');review=root/'review'
+          server=subprocess.Popen(['python3','-m','http.server','8800'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+          try:
+              with sync_playwright() as p:
+                  browser=p.chromium.launch(args=['--use-angle=swiftshader','--enable-unsafe-swiftshader'])
+                  page=browser.new_page(viewport={'width':1280,'height':872},device_scale_factor=1)
+                  errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
+                  page.goto('http://127.0.0.1:8800/bhaderwah/',wait_until='networkidle')
+                  page.wait_for_selector('#loading',state='detached',timeout=90000)
+                  assert not page.locator('.error-copy').count()
+                  page.locator('[data-floor="1"]').click()
+                  page.get_by_role('button',name='Café & bakery',exact=False).click()
+                  page.wait_for_timeout(300)
+                  page.screenshot(path=str(review/'viewer-cafe.png'),timeout=90000)
+                  assert not errors,errors
+                  browser.close()
+          finally:
+              server.terminate()
+          im=Image.open(review/'viewer-cafe.png').convert('RGB');out=io.BytesIO();im.save(out,format='JPEG',quality=87)
+          (review/'viewer-cafe-final.b64').write_text(base64.b64encode(out.getvalue()).decode())
+          archive=root/'Bhaderwah_R03_Website.zip'
+          with zipfile.ZipFile(archive) as z:names=z.namelist()
+          temp=root/'Bhaderwah_R03_Website.tmp'
+          with zipfile.ZipFile(temp,'w',compression=zipfile.ZIP_DEFLATED) as z:
+              for name in names:z.write(root/name,name)
+          temp.replace(archive)
+          print('Corrected cafe sign, final PDF backgrounds and ZIP verified.')
+          PY
+      - name: Save final presentation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- bhaderwah
+          git commit -m "Polish R03 cover and schedule and fit cafe signage within the angled wall"
+          git push origin HEAD:bhaderwah-recovery
