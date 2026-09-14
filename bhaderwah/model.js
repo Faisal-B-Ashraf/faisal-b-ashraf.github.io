@@ -156,7 +156,7 @@ export function buildModel(){
    box(g,25,.1,14.4,6,2.2,2.25,oak);box(g,25,2.3,14.4,6,1.45,2.25,glass);box(g,25,3.75,14.4,6,.08,2.25,bronze);
    for(let n=0;n<8;n++)orb(g,25.6+(n%4)*1.35,2.65,14.9+Math.floor(n/4)*.95,.3,mat('#c88e4d'),.65);
    table(g,22,5,2.4,2.4,2.55);chair(g,23.2,8.3);chair(g,23.2,3.9,Math.PI);table(g,27.5,10,2.4,2.4,2.55);chair(g,28.7,13.3);chair(g,28.7,8.9,Math.PI);
-   sign(g,24.5,6.4,21.65,7,1.2,'COFFEE + FRESH BAKES','#463d32');pendant(g,23.2,6.2,9.4);pendant(g,28.7,11.2,9.4);plant(g,28,2);
+   sign(g,26.5,6.4,21.65,4.8,1.2,'COFFEE + BAKES','#463d32');pendant(g,23.2,6.2,9.4);pendant(g,28.7,11.2,9.4);plant(g,28,2);
   }else if(num===2){
    sideRack(g,32.65,18,12);gondola(g,36,9,2,7);
    box(g,33,.1,20,5.5,2.6,2.5,oak);

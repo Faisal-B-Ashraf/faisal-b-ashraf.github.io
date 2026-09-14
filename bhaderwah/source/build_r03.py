@@ -144,22 +144,23 @@ def phrase(p,old,new,size=9.3):
  assert rr, ('Missing phrase',old)
  r=rr[0]
  for q in rr[1:]:r|=q
- area(p,(r.x0,r.y0-1,1140,r.y1+17),new,size)
+ bg=p.get_pixmap(clip=fitz.Rect(1100,r.y0-3,1101,r.y0-2),alpha=False).pixel(0,0)
+ area(p,(r.x0,r.y0-1,1140,r.y1+17),new,size,fill=tuple(v/255 for v in bg))
 for p in doc:
  replacements=[]
  for b in p.get_text('dict')['blocks']:
   for l in b.get('lines',[]):
    for sp in l['spans']:
     if 'R02' in sp['text']:
-     replacements.append(sp);p.add_redact_annot(fitz.Rect(sp['bbox']),fill=paper)
+     replacements.append(sp);p.add_redact_annot(fitz.Rect(sp['bbox']),fill=(1,1,1) if p.number==0 else paper)
  if replacements:
   p.apply_redactions(images=0,graphics=0);fontpage(p)
   for sp in replacements:
    n=sp['color'];col=((n>>16&255)/255,(n>>8&255)/255,(n&255)/255)
    p.insert_text(sp['origin'],sp['text'].replace('R02','R03'),fontname='FBold' if 'Bold' in sp['font'] else 'FRegular',fontsize=sp['size'],color=col)
 p=doc[0]
-area(p,(50,588,205,630),'Separate parking entry and exit; proposed road ramp.',9.5)
-area(p,(50,739,600,757),'faisal-b-ashraf.github.io/bhaderwah/',8.5)
+area(p,(50,588,205,630),'Separate parking entry and exit; proposed road ramp.',9.5,fill=(1,1,1))
+area(p,(50,739,600,757),'faisal-b-ashraf.github.io/bhaderwah/',8.5,fill=(1,1,1))
 # Replace the old linked QR and both link targets.
 oldlinks=p.get_links()
 for lk in oldlinks:
