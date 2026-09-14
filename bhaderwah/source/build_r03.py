@@ -123,7 +123,7 @@ footer('Fit-outs illustrate the proposed uses. Internal sizes are nominal and su
 c.showPage();c.save()
 planpages=fitz.open(stream=buf.getvalue(),filetype='pdf')
 doc=fitz.open(ROOT/'Bhaderwah_Concept_R02.pdf')
-doc.delete_page(3);doc.delete_page(2);doc.insert_pdf(planpages,start_at=0,end_at=1,start_at=2)
+doc.delete_page(3);doc.delete_page(2);doc.insert_pdf(planpages,from_page=0,to_page=1,start_at=2)
 
 # Coordinate retained cover, site basis, upper-floor sheets and schedule.
 new_url='https://faisal-b-ashraf.github.io/bhaderwah/'
@@ -184,3 +184,9 @@ review=ROOT/'review';review.mkdir(exist_ok=True)
 for i in [0,1,2,3,7]:check[i].get_pixmap(matrix=fitz.Matrix(1,1)).save(review/f'r03-page-{i+1}.png')
 (review/'r03-text.txt').write_text('\n\n'.join(p.get_text() for p in check))
 print('Saved eight-page R03 plans with GitHub links and coordinated shop / parking pages.')
+
+import base64
+from PIL import Image
+for i in [0,1,2,3,7]:
+ im=Image.open(review/f'r03-page-{i+1}.png');b=io.BytesIO();im.save(b,format='JPEG',quality=87)
+ (review/f'r03-page-{i+1}.b64').write_text(base64.b64encode(b.getvalue()).decode())

@@ -25,3 +25,20 @@ try:
   browser.close()
 finally:
  server.terminate()
+
+import base64,io,zipfile
+from PIL import Image
+contact=Image.new('RGB',(1280,872),'white')
+for i,name in enumerate(['cafe','print','convenience','pharmacy']):
+ im=Image.open(root/f'viewer-{name}.png').convert('RGB');im.thumbnail((640,436));contact.paste(im,((i%2)*640,(i//2)*436))
+out=io.BytesIO();contact.save(out,format='JPEG',quality=85);(root/'shops-contact.b64').write_text(base64.b64encode(out.getvalue()).decode())
+for name in ['shops','parking','exterior']:
+ im=Image.open(root/f'viewer-{name}.png').convert('RGB');im.thumbnail((1280,872));out=io.BytesIO();im.save(out,format='JPEG',quality=87);(root/f'viewer-{name}.b64').write_text(base64.b64encode(out.getvalue()).decode())
+site=Path('bhaderwah')
+(site/'README.md').write_text('Bhaderwah House — R03\\n\\nInteractive concept: four fitted road-level shops, two upper residential floors and four lower parking bays. Separate parking entry and exit point toward a proposed road ramp; ramp geometry and land availability remain to be developed.\\n\\nOpen via a static web server. The PDF and exterior rendering are included. Three.js license: third-party-notices.txt.\\n\\nConcept only; not for construction.\\n'.replace('\\\\n','\\n'))
+names=['index.html','app.js','model.js','navigation.js','style.css','exterior.png','Bhaderwah_Concept_R03.pdf','README.md','third-party-notices.txt']
+with zipfile.ZipFile(site/'Bhaderwah_R03_Website.zip','w',compression=zipfile.ZIP_DEFLATED) as z:
+ for name in names:z.write(site/name,name)
+ for path in sorted((site/'lib').rglob('*')):
+  if path.is_file():z.write(path,path.relative_to(site))
+print('Saved presentation ZIP, PDF and visual checks.')
